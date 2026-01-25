@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; media-src 'self' blob:; img-src 'self' data:;">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow">
+  <title>하모니카 롱톤 연습기 - 임지수 하모니카 교실</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 20px;
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #fff;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes completePulse {
+      0%, 100% { filter: drop-shadow(0 0 20px rgba(0, 255, 170, 0.5)); }
+      50% { filter: drop-shadow(0 0 40px rgba(0, 255, 170, 0.8)); }
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      margin: 0 0 4px 0;
+      background: linear-gradient(90deg, #00ffaa, #00d4ff, #aa00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .header p {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.7);
+      font-weight: 300;
+    }
+    
+    /* 가로 레이아웃 컨테이너 */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .main-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    
+    /* 왼쪽: 원형 타이머 */
+    .timer-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 24px;
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+    }
+    
+    .circular-timer {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      margin: 0 auto 16px;
+    }
+    
+    .circular-timer svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+    
+    .timer-bg {
+      fill: none;
+      stroke: rgba(255,255,255,0.1);
+      stroke-width: 14;
+    }
+    
+    .timer-progress {
+      fill: none;
+      stroke: url(#timerGradient);
+      stroke-width: 14;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.1s linear;
+    }
+    
+    .timer-progress.complete {
+      animation: completePulse 1.5s ease-in-out infinite;
+    }
+    
+    .timer-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      width: 180px;
+    }
+    
+    .timer-duration {
+      font-size: 3rem;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+    }
+    
+    .timer-duration.complete {
+      color: #00ffaa;
+    }
+    
+    .timer-unit {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.5);
+      margin-left: 4px;
+    }
+    
+    .timer-target {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 8px;
+    }
+    
+    .timer-target.complete {
+      color: #00ffaa;
+    }
+    
+    /* 목표 설정 */
+    .target-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    
+    .target-btn {
+      flex: 1;
+      min-width: 50px;
+      padding: 10px 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      transition: all 0.2s ease;
+    }
+    
+    .target-btn:hover:not(:disabled) {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .target-btn.active {
+      background: linear-gradient(135deg, #00ffaa, #00d4ff);
+      color: #000;
+    }
+    
+    .target-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* 메인 버튼 */
+    .main-button {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #00ffaa, #00d4ff);
+      color: #000;
+      box-shadow: 0 6px 24px rgba(0, 255, 170, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .main-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(0, 255, 170, 0.4);
+    }
+    
+    .main-button.stop {
+      background: linear-gradient(135deg, #ff5555, #ff8855);
+      color: #fff;
+      box-shadow: 0 6px 24px rgba(255, 85, 85, 0.3);
+    }
+    
+    .main-button.ready {
+      background: linear-gradient(135deg, #aa88ff, #88aaff);
+      color: #fff;
+      box-shadow: 0 6px 24px rgba(170, 136, 255, 0.3);
+    }
+    
+    /* 오른쪽: 정보 패널 */
+    .info-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .info-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+    }
+    
+    /* 음정 표시 */
+    .note-section {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    
+    .note-display {
+      display: flex;
+      align-items: baseline;
+    }
+    
+    .note-letter {
+      font-size: 5rem;
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      color: rgba(255,255,255,0.3);
+      transition: color 0.2s ease;
+    }
+    
+    .note-letter.active {
+      color: #fff;
+      text-shadow: 0 0 20px rgba(0, 255, 170, 0.4);
+    }
+    
+    .note-octave {
+      font-size: 2rem;
+      font-family: 'Orbitron', monospace;
+      color: rgba(255,255,255,0.5);
+      margin-left: 2px;
+    }
+    
+    .note-korean {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #00d4ff;
+    }
+    
+    /* 센트 표시 */
+    .cents-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+    
+    .cents-bar {
+      width: 150px;
+      height: 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      position: relative;
+    }
+    
+    .cents-center {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #00ffaa;
+      transform: translateX(-50%);
+    }
+    
+    .cents-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px;
+      height: 16px;
+      background: #00ffaa;
+      border-radius: 50%;
+      transition: left 0.15s ease-out;
+      box-shadow: 0 0 8px currentColor;
+      display: none;
+    }
+    
+    .cents-value {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.5);
+    }
+    
+    /* 피치 그래프 */
+    .pitch-graph {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 12px;
+      height: 80px;
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      overflow: hidden;
+    }
+    
+    .pitch-placeholder {
+      width: 100%;
+      text-align: center;
+      color: rgba(255,255,255,0.3);
+      font-size: 0.9rem;
+      align-self: center;
+    }
+    
+    .pitch-bar {
+      flex: 1;
+      max-width: 6px;
+      background: #00ffaa;
+      border-radius: 2px 2px 0 0;
+    }
+    
+    /* 통계 그리드 */
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    
+    .stat-card {
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    
+    .stat-label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-size: 1.6rem;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+    }
+    
+    .stat-value.good { color: #00ffaa; }
+    .stat-value.medium { color: #ffaa00; }
+    .stat-value.low { color: #ff5555; }
+    
+    .volume-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    
+    .volume-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #00d4ff, #00ffaa);
+      border-radius: 4px;
+    }
+    
+    /* 최고 기록 */
+    .best-record {
+      text-align: center;
+      padding: 12px;
+      background: rgba(0, 255, 170, 0.1);
+      border-radius: 10px;
+      border: 1px solid rgba(0, 255, 170, 0.2);
+      display: none;
+    }
+    
+    .best-record.show {
+      display: block;
+    }
+    
+    .best-record span {
+      color: rgba(255,255,255,0.7);
+    }
+    
+    .best-record strong {
+      color: #00ffaa;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    
+    /* 연습 기록 */
+    .history-section {
+      display: none;
+    }
+    
+    .history-section.show {
+      display: block;
+    }
+    
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      padding: 4px 0;
+    }
+    
+    .history-header:hover {
+      opacity: 0.8;
+    }
+    
+    .history-toggle {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.5);
+      transition: transform 0.3s ease;
+    }
+    
+    .history-toggle.open {
+      transform: rotate(180deg);
+    }
+    
+    .history-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .history-content.open {
+      max-height: 500px;
+    }
+    
+    .history-label {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.7);
+    }
+    
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .history-note {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .history-note-letter {
+      font-size: 1.1rem;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      color: #00d4ff;
+    }
+    
+    .history-note-korean {
+      color: #00ffaa;
+      font-weight: 600;
+    }
+    
+    .history-stats {
+      text-align: right;
+    }
+    
+    .history-duration {
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+    }
+    
+    .history-stability {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.5);
+    }
+    
+    /* 마이크 상태 표시 */
+    .mic-status {
+      text-align: center;
+      padding: 8px;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 12px;
+    }
+    
+    .mic-status.ready {
+      color: #00ffaa;
+    }
+    
+    /* 반응형 - 세로 모드 */
+    @media (max-width: 900px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+      
+      .timer-card {
+        max-width: 360px;
+        margin: 0 auto;
+      }
+    }
+    
+    /* 축하 효과 */
+    .confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+      overflow: hidden;
+    }
+    
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      opacity: 0;
+    }
+    
+    @keyframes confetti-fall {
+      0% {
+        opacity: 1;
+        transform: translateY(-100px) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(100vh) rotate(720deg);
+      }
+    }
+    
+    /* 결과 메시지 */
+    .result-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      padding: 30px 50px;
+      border-radius: 20px;
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-align: center;
+      z-index: 1001;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    
+    .result-message.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    
+    .result-message.success {
+      background: linear-gradient(135deg, rgba(0, 255, 170, 0.95), rgba(0, 212, 255, 0.95));
+      color: #000;
+      box-shadow: 0 10px 50px rgba(0, 255, 170, 0.5);
+    }
+    
+    .result-message.fail {
+      background: linear-gradient(135deg, rgba(255, 170, 0, 0.95), rgba(255, 100, 50, 0.95));
+      color: #000;
+      box-shadow: 0 10px 50px rgba(255, 170, 0, 0.5);
+    }
+    
+    .result-message .emoji {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+    
+    .result-message .sub-text {
+      font-size: 1rem;
+      font-weight: 400;
+      margin-top: 10px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎵 하모니카 롱톤 연습기</h1>
+    <p>임지수 하모니카 교실</p>
+  </div>
+
+  <div class="container">
+    <div class="main-layout">
+      <!-- 왼쪽: 타이머 & 컨트롤 -->
+      <div class="timer-card">
+        <div class="circular-timer">
+          <svg viewBox="0 0 240 240">
+            <defs>
+              <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#00d4ff"/>
+                <stop offset="100%" stop-color="#00ffaa"/>
+              </linearGradient>
+              <linearGradient id="timerGradientComplete" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#00ffaa"/>
+                <stop offset="100%" stop-color="#00ff88"/>
+              </linearGradient>
+            </defs>
+            <circle class="timer-bg" cx="120" cy="120" r="100"/>
+            <circle class="timer-progress" id="timerProgress" cx="120" cy="120" r="100" 
+                    stroke-dasharray="628" stroke-dashoffset="628"/>
+          </svg>
+          <div class="timer-content">
+            <div class="timer-duration" id="timerDuration">0.0<span class="timer-unit">초</span></div>
+            <div class="timer-target" id="timerTarget">목표: 10초</div>
+          </div>
+        </div>
+        
+        <div class="mic-status" id="micStatus">🎤 마이크 연결 대기중...</div>
+        
+        <div class="target-buttons" id="targetButtons">
+          <button class="target-btn" data-seconds="5">5초</button>
+          <button class="target-btn active" data-seconds="10">10초</button>
+          <button class="target-btn" data-seconds="15">15초</button>
+          <button class="target-btn" data-seconds="20">20초</button>
+          <button class="target-btn" data-seconds="30">30초</button>
+        </div>
+        
+        <button class="main-button" id="mainButton">🎤 마이크 연결</button>
+        
+        <div class="best-record" id="bestRecord">
+          <span>🏆 최고 기록: </span>
+          <strong id="bestRecordValue">0.0초</strong>
+        </div>
+      </div>
+      
+      <!-- 오른쪽: 정보 패널 -->
+      <div class="info-panel">
+        <div class="info-card">
+          <div class="note-section">
+            <div class="note-display">
+              <span class="note-letter" id="noteLetter">-</span>
+              <span class="note-octave" id="noteOctave"></span>
+            </div>
+            <span class="note-korean" id="noteKorean">-</span>
+            <div class="cents-container">
+              <div class="cents-bar">
+                <div class="cents-center"></div>
+                <div class="cents-indicator" id="centsIndicator"></div>
+              </div>
+              <span class="cents-value" id="centsValue">- ¢</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <div class="pitch-graph" id="pitchGraph">
+            <div class="pitch-placeholder">음정 변화가 여기에 표시됩니다</div>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-label">안정성</div>
+              <div class="stat-value" id="stabilityValue">0%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">볼륨</div>
+              <div class="volume-bar">
+                <div class="volume-fill" id="volumeFill"></div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">주파수</div>
+              <div class="stat-value" id="frequencyValue" style="font-size:1.2rem;">- Hz</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="info-card history-section" id="historySection">
+          <div class="history-header" id="historyHeader">
+            <span class="history-label">📋 최근 연습 기록</span>
+            <span class="history-toggle" id="historyToggle">▼</span>
+          </div>
+          <div class="history-content" id="historyContent">
+            <div class="history-list" id="historyList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 축하 효과 컨테이너 -->
+  <div class="confetti-container" id="confettiContainer"></div>
+  
+  <!-- 결과 메시지 -->
+  <div class="result-message" id="resultMessage">
+    <span class="emoji"></span>
+    <span class="main-text"></span>
+    <span class="sub-text"></span>
+  </div>
+
+  <script>
+    'use strict';
+    
+    // 보안: 전역 스코프 오염 방지를 위한 IIFE
+    (function() {
+      // 보안: 개발자 도구 감지 (선택적)
+      const devToolsCheck = function() {};
+      
+      // 보안: 외부 접근 차단
+      if (window.top !== window.self) {
+        document.body.innerHTML = '<h1>이 페이지는 iframe에서 실행할 수 없습니다.</h1>';
+        return;
+      }
+
+    // 음계 주파수 매핑
+    const NOTE_FREQUENCIES = {
+      'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
+      'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
+      'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99, 'A5': 880.00, 'B5': 987.77,
+      'C6': 1046.50
+    };
+
+    const NOTE_NAMES_KR = { 'C': '도', 'D': '레', 'E': '미', 'F': '파', 'G': '솔', 'A': '라', 'B': '시' };
+
+    // 상태 변수
+    let isMicConnected = false;
+    let isPracticing = false;
+    let targetDuration = 10;
+    let bestRecord = 0;
+    let history = [];
+    let audioContext = null;
+    let analyser = null;
+    let stream = null;
+    let animationId = null;
+    let noteStartTime = null;
+    let pitchBuffer = [];
+    let pitchHistory = [];
+    let currentStability = 0;
+    
+    // 안정화를 위한 변수
+    let lastSoundTime = null;
+    const SILENCE_TOLERANCE = 500;  // 무음 허용 시간 (ms) - 0.5초로 늘림
+    
+    // 목표 달성 관련
+    let goalAchieved = false;
+    let finalStability = 0;
+    let practiceStarted = false;  // 첫 소리 감지 여부
+    let practiceEnded = false;    // 연습 종료 여부
+    let lastDetectedNote = null;  // 마지막으로 감지된 음
+    let soundDetectCount = 0;     // 연속 소리 감지 횟수
+    const SOUND_CONFIRM_COUNT = 10; // 연습 시작에 필요한 연속 감지 횟수
+    let buttonState = 'start';    // 버튼 상태: 'start', 'stop', 'ready'
+
+    // 원형 타이머 설정
+    const CIRCLE_RADIUS = 100;
+    const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
+
+    // DOM 요소
+    const timerProgress = document.getElementById('timerProgress');
+    const timerDuration = document.getElementById('timerDuration');
+    const timerTarget = document.getElementById('timerTarget');
+    const noteLetter = document.getElementById('noteLetter');
+    const noteOctave = document.getElementById('noteOctave');
+    const noteKorean = document.getElementById('noteKorean');
+    const centsIndicator = document.getElementById('centsIndicator');
+    const centsValue = document.getElementById('centsValue');
+    const pitchGraph = document.getElementById('pitchGraph');
+    const stabilityValue = document.getElementById('stabilityValue');
+    const volumeFill = document.getElementById('volumeFill');
+    const frequencyValue = document.getElementById('frequencyValue');
+    const targetButtons = document.getElementById('targetButtons');
+    const mainButton = document.getElementById('mainButton');
+    const micStatus = document.getElementById('micStatus');
+    const bestRecordDiv = document.getElementById('bestRecord');
+    const bestRecordValue = document.getElementById('bestRecordValue');
+    const historySection = document.getElementById('historySection');
+    const historyList = document.getElementById('historyList');
+
+    // 음정 감지 함수
+    function getNoteName(frequency) {
+      if (frequency < 100 || frequency > 1200) return null;
+      
+      let closestNote = null;
+      let minDiff = Infinity;
+      
+      for (const [note, freq] of Object.entries(NOTE_FREQUENCIES)) {
+        const diff = Math.abs(frequency - freq);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestNote = note;
+        }
+      }
+      
+      const cents = 1200 * Math.log2(frequency / NOTE_FREQUENCIES[closestNote]);
+      return { note: closestNote, cents: Math.round(cents), frequency };
+    }
+
+    // 피치 감지
+    function detectPitch(analyserNode, dataArray) {
+      analyserNode.getFloatTimeDomainData(dataArray);
+      
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i] * dataArray[i];
+      }
+      const rms = Math.sqrt(sum / dataArray.length);
+      const volumeDb = 20 * Math.log10(rms + 0.0001);
+      const normalizedVolume = Math.max(0, Math.min(100, (volumeDb + 60) * 1.67));
+      volumeFill.style.width = normalizedVolume + '%';
+      
+      if (normalizedVolume < 25) return null;
+      
+      const sampleRate = audioContext.sampleRate;
+      const bufferSize = dataArray.length;
+      
+      let bestOffset = -1;
+      let bestCorrelation = 0;
+      
+      const minPeriod = Math.floor(sampleRate / 1200);
+      const maxPeriod = Math.floor(sampleRate / 80);
+      
+      for (let offset = minPeriod; offset < maxPeriod && offset < bufferSize / 2; offset++) {
+        let correlation = 0;
+        for (let i = 0; i < bufferSize / 2; i++) {
+          correlation += dataArray[i] * dataArray[i + offset];
+        }
+        
+        if (correlation > bestCorrelation) {
+          bestCorrelation = correlation;
+          bestOffset = offset;
+        }
+      }
+      
+      if (bestOffset > 0 && bestCorrelation > 0.02) {
+        const frequency = sampleRate / bestOffset;
+        return getNoteName(frequency);
+      }
+      
+      return null;
+    }
+
+    // UI 업데이트 함수
+    function updateCircularTimer(duration, isComplete) {
+      const progress = Math.min(1, duration / targetDuration);
+      const offset = CIRCLE_CIRCUMFERENCE * (1 - progress);
+      timerProgress.style.strokeDashoffset = offset;
+      
+      if (isComplete) {
+        timerProgress.style.stroke = 'url(#timerGradientComplete)';
+        timerProgress.classList.add('complete');
+        timerDuration.classList.add('complete');
+        timerTarget.classList.add('complete');
+        timerTarget.textContent = '목표: ' + targetDuration + '초 ✓ 달성!';
+      } else {
+        timerProgress.style.stroke = 'url(#timerGradient)';
+        timerProgress.classList.remove('complete');
+        timerDuration.classList.remove('complete');
+        timerTarget.classList.remove('complete');
+        timerTarget.textContent = '목표: ' + targetDuration + '초';
+      }
+      
+      timerDuration.innerHTML = duration.toFixed(1) + '<span class="timer-unit">초</span>';
+    }
+
+    function updateNoteDisplay(noteInfo) {
+      if (noteInfo) {
+        const letter = noteInfo.note.charAt(0);
+        const octave = noteInfo.note.charAt(1);
+        
+        noteLetter.textContent = letter;
+        noteLetter.classList.add('active');
+        noteOctave.textContent = octave;
+        noteKorean.textContent = NOTE_NAMES_KR[letter];
+        
+        centsIndicator.style.display = 'block';
+        centsIndicator.style.left = (50 + (noteInfo.cents / 50) * 50) + '%';
+        
+        if (Math.abs(noteInfo.cents) < 10) {
+          centsIndicator.style.background = '#00ffaa';
+        } else if (Math.abs(noteInfo.cents) < 25) {
+          centsIndicator.style.background = '#ffaa00';
+        } else {
+          centsIndicator.style.background = '#ff5555';
+        }
+        
+        centsValue.textContent = (noteInfo.cents > 0 ? '+' : '') + noteInfo.cents + '¢';
+        frequencyValue.textContent = Math.round(noteInfo.frequency) + ' Hz';
+      } else {
+        noteLetter.textContent = '-';
+        noteLetter.classList.remove('active');
+        noteOctave.textContent = '';
+        noteKorean.textContent = '-';
+        centsIndicator.style.display = 'none';
+        centsValue.textContent = '- ¢';
+        frequencyValue.textContent = '- Hz';
+      }
+    }
+
+    function updatePitchGraph() {
+      if (pitchHistory.length === 0) {
+        pitchGraph.innerHTML = '<div class="pitch-placeholder">음정 변화가 여기에 표시됩니다</div>';
+        return;
+      }
+      
+      pitchGraph.innerHTML = '';
+      pitchHistory.forEach((p, i) => {
+        const bar = document.createElement('div');
+        bar.className = 'pitch-bar';
+        const height = Math.max(5, 50 + p.cents);
+        bar.style.height = height + '%';
+        
+        if (Math.abs(p.cents) < 10) {
+          bar.style.background = '#00ffaa';
+        } else if (Math.abs(p.cents) < 25) {
+          bar.style.background = '#00d4ff';
+        } else {
+          bar.style.background = '#ffaa00';
+        }
+        
+        bar.style.opacity = 0.6 + (i / pitchHistory.length) * 0.4;
+        pitchGraph.appendChild(bar);
+      });
+    }
+
+    function updateStability(stability) {
+      currentStability = stability;
+      stabilityValue.textContent = Math.round(stability) + '%';
+      stabilityValue.className = 'stat-value';
+      
+      if (stability > 80) {
+        stabilityValue.classList.add('good');
+      } else if (stability > 50) {
+        stabilityValue.classList.add('medium');
+      } else {
+        stabilityValue.classList.add('low');
+      }
+    }
+
+    function addHistoryItem(record) {
+      history.push(record);
+      if (history.length > 10) history.shift();
+      
+      historySection.classList.add('show');
+      historyList.innerHTML = '';
+      
+      [...history].reverse().forEach(rec => {
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerHTML = `
+          <div class="history-note">
+            <span class="history-note-letter">${rec.note}</span>
+            <span class="history-note-korean">${NOTE_NAMES_KR[rec.note.charAt(0)]}</span>
+          </div>
+          <div class="history-stats">
+            <div class="history-duration">${rec.duration.toFixed(1)}초</div>
+            <div class="history-stability">안정성 ${Math.round(rec.stability)}%</div>
+          </div>
+        `;
+        historyList.appendChild(item);
+      });
+    }
+    
+    // 축하 꽃가루 효과
+    function showConfetti() {
+      const container = document.getElementById('confettiContainer');
+      container.innerHTML = '';
+      
+      const colors = ['#00ffaa', '#00d4ff', '#ff00aa', '#ffaa00', '#aa00ff', '#00ff88', '#ff5555'];
+      const shapes = ['■', '●', '▲', '★', '♦', '♥'];
+      
+      for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.color = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.fontSize = (Math.random() * 20 + 10) + 'px';
+        confetti.style.animation = `confetti-fall ${Math.random() * 2 + 2}s ease-out forwards`;
+        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+        container.appendChild(confetti);
+      }
+      
+      // 3초 후 정리
+      setTimeout(() => {
+        container.innerHTML = '';
+      }, 4000);
+    }
+    
+    // 결과 메시지 표시
+    function showResultMessage(success, duration) {
+      const msg = document.getElementById('resultMessage');
+      const emoji = msg.querySelector('.emoji');
+      const mainText = msg.querySelector('.main-text');
+      const subText = msg.querySelector('.sub-text');
+      
+      msg.classList.remove('success', 'fail');
+      
+      if (success) {
+        msg.classList.add('success');
+        emoji.textContent = '🎉';
+        mainText.textContent = '축하합니다!';
+        subText.textContent = `${duration.toFixed(1)}초 목표 달성! 안정성 ${Math.round(finalStability)}%`;
+      } else {
+        msg.classList.add('fail');
+        emoji.textContent = '💪';
+        mainText.textContent = '더 노력하세요!';
+        subText.textContent = `${duration.toFixed(1)}초 / 목표 ${targetDuration}초`;
+      }
+      
+      msg.classList.add('show');
+      
+      // 2.5초 후 숨기기
+      setTimeout(() => {
+        msg.classList.remove('show');
+      }, 2500);
+    }
+    
+    // 연습 종료 처리 (결과 유지하면서 버튼 상태만 변경)
+    function finishPractice(statusMessage) {
+      isPracticing = false;
+      practiceEnded = true;
+      buttonState = 'stop';
+      
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+      
+      mainButton.textContent = '⏹️ 정지';
+      mainButton.classList.add('stop');
+      
+      document.querySelectorAll('.target-btn').forEach(btn => btn.disabled = true);
+      
+      micStatus.textContent = statusMessage;
+    }
+
+    // 마이크 연결 (한 번만)
+    async function connectMicrophone() {
+      // 보안: 마이크 API 지원 확인
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('이 브라우저는 마이크 기능을 지원하지 않습니다.');
+        return;
+      }
+      
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false
+          }
+        });
+        
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        
+        const source = audioContext.createMediaStreamSource(stream);
+        source.connect(analyser);
+        
+        analyser.fftSize = 4096;
+        
+        isMicConnected = true;
+        buttonState = 'start';
+        micStatus.textContent = '🎤 마이크 연결됨';
+        micStatus.classList.add('ready');
+        mainButton.textContent = '▶️ 연습 시작';
+        
+      } catch (err) {
+        console.error('마이크 접근 오류:', err);
+        alert('마이크 사용 권한이 필요합니다.');
+        micStatus.textContent = '❌ 마이크 연결 실패';
+      }
+    }
+
+    // 연습 시작
+    function startPractice() {
+      if (!isMicConnected) return;
+      
+      isPracticing = true;
+      practiceStarted = false;  // 아직 첫 소리 감지 전
+      practiceEnded = false;
+      noteStartTime = null;
+      pitchBuffer = [];
+      pitchHistory = [];
+      lastSoundTime = null;
+      lastDetectedNote = null;
+      soundDetectCount = 0;
+      goalAchieved = false;
+      finalStability = 0;
+      
+      mainButton.textContent = '⏹️ 정지';
+      mainButton.classList.add('stop');
+      mainButton.classList.remove('ready');
+      buttonState = 'stop';
+      
+      document.querySelectorAll('.target-btn').forEach(btn => btn.disabled = true);
+      
+      updateCircularTimer(0, false);
+      updateStability(0);
+      updatePitchGraph();
+      
+      // 대기 상태 표시
+      micStatus.textContent = '🎵 소리를 기다리는 중...';
+      
+      const dataArray = new Float32Array(analyser.fftSize);
+      
+      function analyze() {
+        if (!isPracticing || practiceEnded) return;
+        
+        const noteInfo = detectPitch(analyser, dataArray);
+        const now = Date.now();
+        
+        if (noteInfo) {
+          // 소리가 감지됨
+          soundDetectCount++;
+          lastDetectedNote = noteInfo.note;
+          
+          // 연속으로 일정 횟수 감지되어야 실제 소리로 인정
+          if (soundDetectCount >= SOUND_CONFIRM_COUNT) {
+            lastSoundTime = now;
+            
+            // 첫 소리 감지 - 연습 시작!
+            if (!practiceStarted) {
+              practiceStarted = true;
+              noteStartTime = now;
+              micStatus.textContent = '🎤 연습 중...';
+            }
+            
+            // 현재 음 표시
+            updateNoteDisplay(noteInfo);
+            
+            // 타이머 계산 (소리가 날 때만 업데이트)
+            const elapsed = (now - noteStartTime) / 1000;
+            
+            // 안정성 계산 (센트 기반 - 각 음 내에서 얼마나 정확한지)
+            pitchBuffer.push(noteInfo.cents);
+            if (pitchBuffer.length > 50) pitchBuffer.shift();
+            
+            if (pitchBuffer.length > 5) {
+              const avg = pitchBuffer.reduce((a, b) => a + b, 0) / pitchBuffer.length;
+              const variance = pitchBuffer.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / pitchBuffer.length;
+              const stdDev = Math.sqrt(variance);
+              // 센트 표준편차가 작을수록 안정적 (stdDev 50 이상이면 0%)
+              const stability = Math.max(0, Math.min(100, 100 - stdDev * 2));
+              updateStability(stability);
+              finalStability = stability;
+            }
+            
+            // 피치 그래프 업데이트
+            pitchHistory.push({ time: elapsed, cents: noteInfo.cents });
+            if (pitchHistory.length > 100) pitchHistory.shift();
+            updatePitchGraph();
+            
+            // 목표 달성 체크
+            if (elapsed >= targetDuration) {
+              // 목표 달성!
+              goalAchieved = true;
+              practiceEnded = true;
+              
+              updateCircularTimer(elapsed, true);
+              
+              if (elapsed > bestRecord) {
+                bestRecord = elapsed;
+                bestRecordValue.textContent = bestRecord.toFixed(1) + '초';
+                bestRecordDiv.classList.add('show');
+              }
+              
+              addHistoryItem({
+                note: noteInfo.note,
+                duration: elapsed,
+                stability: finalStability
+              });
+              
+              showConfetti();
+              showResultMessage(true, elapsed);
+              finishPractice('🎉 목표 달성! 다시 하려면 연습 시작을 누르세요');
+              return;
+            } else {
+              // 아직 목표 미달성 - 타이머 업데이트
+              updateCircularTimer(elapsed, false);
+            }
+          } else {
+            // 아직 확정 전 - 대기 중 표시
+            micStatus.textContent = '🎵 소리 감지 중...';
+          }
+          
+        } else {
+          // 소리가 감지되지 않음
+          soundDetectCount = 0;  // 연속 감지 카운터 리셋
+          
+          if (practiceStarted && lastSoundTime) {
+            const silenceDuration = now - lastSoundTime;
+            
+            if (silenceDuration > SILENCE_TOLERANCE) {
+              // 호흡 끊김! - 마지막 소리 시점까지의 시간으로 계산
+              const finalDuration = (lastSoundTime - noteStartTime) / 1000;
+              practiceEnded = true;
+              
+              // 타이머를 끊긴 시점에서 고정
+              updateCircularTimer(finalDuration, false);
+              
+              if (finalDuration >= 1) {
+                addHistoryItem({
+                  note: lastDetectedNote || '-',
+                  duration: finalDuration,
+                  stability: currentStability
+                });
+              }
+              
+              showResultMessage(false, finalDuration);
+              finishPractice('😤 호흡이 끊김! 다시 하려면 연습 시작을 누르세요');
+              return;
+            }
+            // 허용 시간 내 - 타이머 표시는 현재 상태 유지 (증가 안 함)
+          }
+        }
+        
+        animationId = requestAnimationFrame(analyze);
+      }
+      
+      analyze();
+    }
+
+    // 연습 정지 (정지 버튼 클릭 시)
+    function stopPractice() {
+      isPracticing = false;
+      practiceEnded = true;
+      buttonState = 'ready';
+      
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+      
+      // 목표 미달성 상태에서 정지 시 기록 저장
+      if (!goalAchieved && practiceStarted && noteStartTime) {
+        const finalDuration = (Date.now() - noteStartTime) / 1000;
+        if (finalDuration >= 1) {
+          addHistoryItem({
+            note: lastDetectedNote || '-',
+            duration: finalDuration,
+            stability: currentStability
+          });
+        }
+      }
+      
+      mainButton.textContent = '🔄 준비';
+      mainButton.classList.remove('stop');
+      mainButton.classList.add('ready');
+      
+      document.querySelectorAll('.target-btn').forEach(btn => btn.disabled = false);
+      
+      // UI 초기화 (목표 달성 시 안정성은 유지)
+      updateNoteDisplay(null);
+      updateCircularTimer(0, false);
+      
+      // 목표 달성하지 못했을 때만 안정성 초기화
+      if (!goalAchieved) {
+        updateStability(0);
+      }
+      
+      micStatus.textContent = '🎤 준비를 누르면 연습시작으로 전환됩니다';
+      micStatus.classList.add('ready');
+      
+      pitchHistory = [];
+      pitchBuffer = [];
+      noteStartTime = null;
+      lastSoundTime = null;
+      lastDetectedNote = null;
+      soundDetectCount = 0;
+      goalAchieved = false;
+      practiceStarted = false;
+      practiceEnded = false;
+      updatePitchGraph();
+    }
+    
+    // 준비 상태로 전환 (준비 버튼 클릭 시)
+    function setReady() {
+      buttonState = 'start';
+      mainButton.textContent = '▶️ 연습 시작';
+      mainButton.classList.remove('ready');
+      micStatus.textContent = '🎤 마이크 연결됨';
+    }
+
+    // 버튼 클릭 핸들러
+    mainButton.addEventListener('click', () => {
+      if (!isMicConnected) {
+        connectMicrophone();
+      } else if (buttonState === 'start') {
+        startPractice();
+      } else if (buttonState === 'stop') {
+        stopPractice();
+      } else if (buttonState === 'ready') {
+        setReady();
+      }
+    });
+
+    targetButtons.addEventListener('click', (e) => {
+      if (e.target.classList.contains('target-btn') && !isPracticing) {
+        document.querySelectorAll('.target-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        targetDuration = parseInt(e.target.dataset.seconds);
+        timerTarget.textContent = '목표: ' + targetDuration + '초';
+      }
+    });
+    
+    // 연습기록 토글
+    document.getElementById('historyHeader').addEventListener('click', () => {
+      const content = document.getElementById('historyContent');
+      const toggle = document.getElementById('historyToggle');
+      content.classList.toggle('open');
+      toggle.classList.toggle('open');
+    });
+
+    // 초기화
+    timerProgress.style.strokeDasharray = CIRCLE_CIRCUMFERENCE;
+    timerProgress.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE;
+    
+    // 보안: 전역 에러 핸들링
+    window.addEventListener('error', function(e) {
+      console.error('오류 발생:', e.message);
+      return true;
+    });
+    
+    // 보안: 우클릭 방지 (선택적)
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+    });
+    
+    })(); // IIFE 끝
+  </script>
+</body>
+</html>
